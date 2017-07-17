@@ -5,24 +5,29 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Dilawar on 6/26/2017.
  */
 
 public class FragmentAdapter extends FragmentPagerAdapter {
 
-    FragmentAdapter(FragmentManager fragmentManager)
-    {
+
+    private List<QuoteData> list;
+    FragmentAdapter(FragmentManager fragmentManager, List<QuoteData> list) {
         super(fragmentManager);
+        this.list =list;
     }
     @Override
     public Fragment getItem(int position) {
-        return MainFragment.newInstance(R.layout.fragment_main);
+        return MainFragment.newInstance(R.layout.fragment_main, list.get(position));
 
     }
 
     @Override
     public int getCount() {
-        return 7;
+        return list.size();
     }
 }

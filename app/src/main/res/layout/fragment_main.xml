@@ -1,9 +1,35 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#dadada"
     tools:context="com.hadilawar.successbits.MainFragment">
 
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/fav_icon" />
 
-</FrameLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/share" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="Dont try to be someone else, be yourself,\n everyone else is taken\n\t\t\t\t\t\t\t\t\t\t\t\tDilawar"
+        android:id="@+id/quotetext"
+        android:textSize="25dp"
+        android:fontFamily="cursive"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        />
+
+
+</RelativeLayout>
