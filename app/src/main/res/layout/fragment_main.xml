@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -30,6 +31,16 @@
         android:textColor="@color/colorAccent"
         android:textStyle="bold"
         />
+
+    <ImageButton
+        android:id="@+id/speak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/quotetext"
+        android:layout_below="@+id/quotetext"
+        android:layout_marginTop="14dp"
+        android:onClick="speakQuote"
+        app:srcCompat="@drawable/speaker" />
 
 
 </RelativeLayout>

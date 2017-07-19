@@ -3,11 +3,12 @@ package com.hadilawar.successbits;
 import android.content.Context;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 
 import java.util.Locale;
 
 /**
- * Created by Dilawar on 7/18/2017.
+ * Created by l1s14bscs2083 on 7/19/2017.
  */
 
 public class Speaker implements TextToSpeech.OnInitListener {
@@ -18,37 +19,34 @@ public class Speaker implements TextToSpeech.OnInitListener {
 
     private boolean allowed = false;
 
-    public Speaker(Context context) {
+    public Speaker(Context context){
         tts = new TextToSpeech(context, this);
     }
-
-    public boolean isAllowed() {
-        return allowed;
-    }
-
-    public void allow(boolean allowed) {
-        this.allowed = allowed;
-    }
-
 
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            // Change this to match your
-            // locale
-            tts.setLanguage(Locale.US);
-            ready = true;
+            int result = tts.setLanguage(Locale.UK);
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "This Language is not supported");
+            }
+
+            //speak(list);
+
         } else {
-            ready = false;
+            Log.e("TTS", "Initilization Failed!");
         }
     }
 
-    public void speak(String text) {
+    public void speak(String text){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-        } else {
+        }else{
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
     }
-
+    public void destroy(){
+        tts.stop();
+        tts.shutdown();
+    }
 }
