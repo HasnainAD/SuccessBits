@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#dadada"
+    android:background="@drawable/background"
     tools:context="com.hadilawar.successbits.MainFragment">
 
 
@@ -39,6 +39,7 @@
         android:layout_alignEnd="@+id/quotetext"
         android:layout_below="@+id/quotetext"
         android:layout_marginTop="14dp"
+        android:background="@null"
         android:onClick="speakQuote"
         app:srcCompat="@drawable/speaker" />
 

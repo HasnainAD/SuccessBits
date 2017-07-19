@@ -3,11 +3,14 @@ package com.hadilawar.successbits;
 import android.content.Intent;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
@@ -141,6 +144,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void speakQuote(View view) {
         //fetch code and speak karo
-        speaker.speak("hapakala donut");
+        ViewGroup viewGroup = (ViewGroup) view.getRootView();
+        TextView textView = (TextView) viewGroup.findViewById(R.id.quotetext);
+        String quote = (String)textView.getText();
+        view.setClickable(false);
+        speaker.speak(quote);
+        view.setClickable(true);
     }
 }
