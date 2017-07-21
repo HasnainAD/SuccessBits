@@ -148,41 +148,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void speakQuote(View view) {
         //fetch code and speak karo
-        ViewGroup viewGroup = (ViewGroup) view.getRootView();
-        TextView textView = (TextView) viewGroup.findViewById(R.id.quotetext);
-        String quote = (String)textView.getText();
         ImageView img = (ImageView) view;
-
-        //When clicked, make it unclicable and speak
         view.setClickable(false);
-
-
         ((AnimationDrawable) img.getBackground()).start();
-        //speaker.speak(quote);
-        //((AnimationDrawable) img.getBackground()).stop();
-        //when speaking is done , make it clickable
-        view.setClickable(true);
     }
 
-
-    private class SpeakerThread extends AsyncTask<String, Void , Void>{
-
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-
-            speaker.speak(params[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-
-
-
-            super.onPostExecute(aVoid);
-        }
-    }
 }
 

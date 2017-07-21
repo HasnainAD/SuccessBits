@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainFragment extends Fragment implements View.OnClickListener{
@@ -49,10 +50,10 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         speaker = new Speaker(getActivity());
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
         mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
-        speakMe = new SpeakQuote();
+
         String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
         mTextview.setText(text);
-
+        speakMe = new SpeakQuote();
         speaking = false;
         mImageView = (ImageView) fragmentView.findViewById(R.id.speak);
         mImageView.setOnClickListener(this);
@@ -62,20 +63,18 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
+
         String quote = mTextview.getText().toString();
-
-
-
-        if(!(speakMe.getStatus() == AsyncTask.Status.RUNNING) && speakMe.getStatus() == AsyncTask.Status.FINISHED){
+        if(!(speakMe.getStatus() == AsyncTask.Status.RUNNING) ){
 
 
             ((AnimationDrawable) mImageView.getBackground()).start();
-           // speaking =true;
+            Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
+            speakMe = new SpeakQuote();
             speakMe.execute(quote);
 
         }else {
             ((AnimationDrawable) mImageView.getBackground()).stop();
-          //  speaking = false;
             speakMe.cancel(true);
         }
     }
