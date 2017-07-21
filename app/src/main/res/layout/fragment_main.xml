@@ -32,16 +32,15 @@
         android:textStyle="bold"
         />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/speak"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/quotetext"
         android:layout_below="@+id/quotetext"
         android:layout_marginTop="14dp"
-        android:background="@null"
         android:onClick="speakQuote"
-        app:srcCompat="@drawable/speaker" />
+        android:background="@drawable/speaker_anim" />
 
 
 </RelativeLayout>

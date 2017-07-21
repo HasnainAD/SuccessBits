@@ -14,15 +14,16 @@ import java.util.List;
 
 public class FragmentAdapter extends FragmentPagerAdapter {
 
-
+   // private Speaker speaker;
     private List<QuoteData> list;
     FragmentAdapter(FragmentManager fragmentManager, List<QuoteData> list) {
         super(fragmentManager);
         this.list =list;
+        //this.speaker = speaker;
     }
     @Override
     public Fragment getItem(int position) {
-        return MainFragment.newInstance(R.layout.fragment_main, list.get(position ));
+        return MainFragment.newInstance(R.layout.fragment_main, list.get(position));
 
     }
 

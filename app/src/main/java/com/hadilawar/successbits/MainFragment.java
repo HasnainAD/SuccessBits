@@ -2,20 +2,29 @@ package com.hadilawar.successbits;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_LAYOUT="layout";
     private QuoteData quoteData;
     private Speaker speaker;
+    private ImageView mImageView;
+    private TextView mTextview;
+    boolean speaking;
+    private SpeakQuote speakMe;
+
+
     //Returns an Instance of fragment
     static Fragment newInstance(int layoutId, QuoteData quoteData) {
         Fragment result=new MainFragment();
@@ -37,19 +46,56 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-
+        speaker = new Speaker(getActivity());
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
-        TextView textview = (TextView)fragmentView.findViewById(R.id.quotetext);
+        mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
+        speakMe = new SpeakQuote();
         String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
-        textview.setText(text);
-        ImageButton imageButton = (ImageButton) fragmentView.findViewById(R.id.speak);
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //speak();
-            }
-        });
+        mTextview.setText(text);
+
+        speaking = false;
+        mImageView = (ImageView) fragmentView.findViewById(R.id.speak);
+        mImageView.setOnClickListener(this);
         return(fragmentView);
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        String quote = mTextview.getText().toString();
+
+
+
+        if(!(speakMe.getStatus() == AsyncTask.Status.RUNNING) && speakMe.getStatus() == AsyncTask.Status.FINISHED){
+
+
+            ((AnimationDrawable) mImageView.getBackground()).start();
+           // speaking =true;
+            speakMe.execute(quote);
+
+        }else {
+            ((AnimationDrawable) mImageView.getBackground()).stop();
+          //  speaking = false;
+            speakMe.cancel(true);
+        }
+    }
+
+    private class SpeakQuote extends AsyncTask<String, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(String... params) {
+
+            speaking = true;
+            speaker.speak(params[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            ((AnimationDrawable) mImageView.getBackground()).stop();
+            speaking = false;
+            super.onPostExecute(aVoid);
+        }
     }
 }

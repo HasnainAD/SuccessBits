@@ -1,15 +1,16 @@
 package com.hadilawar.successbits;
 
 import android.content.Intent;
-import android.os.Build;
+import android.graphics.drawable.AnimationDrawable;
+import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +22,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,26 +40,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mFirebaseDatabase.setPersistenceEnabled(true);
         mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
 
-       // tts = new Speaker(this);
+
+        // tts = new Speaker(this);
+        checkTTS();
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new FragmentAdapter(getFragmentManager(), list);
         viewPager.setAdapter(adapter);
-
         //check and Install TTS
-        checkTTS();
 
-        mChildEventListener = new ChildEventListener() {
+
+        mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    quoteData =dataSnapshot.getValue(QuoteData.class);
+                quoteData =dataSnapshot.getValue(QuoteData.class);
 
-                    list.add(quoteData);
-                    adapter.notifyDataSetChanged();
-                    if(list.size() >=2)
-                        speaker.speak((list.get(1)).getQuote());
-                    Toast.makeText(MainActivity.this,quoteData.getQuote(),Toast.LENGTH_SHORT).show();
+                list.add(quoteData);
+                adapter.notifyDataSetChanged();
+                if(list.size() >=2)
+                    //speaker.speak((list.get(1)).getQuote());
+                Toast.makeText(MainActivity.this,quoteData.getQuote(),Toast.LENGTH_SHORT).show();
 
             }
 
@@ -82,9 +84,11 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        };
+        }
+);
 
-        mDatabaseReference.addChildEventListener(mChildEventListener);
+
+
 
 
 
@@ -147,8 +151,38 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup viewGroup = (ViewGroup) view.getRootView();
         TextView textView = (TextView) viewGroup.findViewById(R.id.quotetext);
         String quote = (String)textView.getText();
+        ImageView img = (ImageView) view;
+
+        //When clicked, make it unclicable and speak
         view.setClickable(false);
-        speaker.speak(quote);
+
+
+        ((AnimationDrawable) img.getBackground()).start();
+        //speaker.speak(quote);
+        //((AnimationDrawable) img.getBackground()).stop();
+        //when speaking is done , make it clickable
         view.setClickable(true);
     }
+
+
+    private class SpeakerThread extends AsyncTask<String, Void , Void>{
+
+
+        @Override
+        protected Void doInBackground(String... params) {
+
+
+            speaker.speak(params[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+
+
+            super.onPostExecute(aVoid);
+        }
+    }
 }
+
