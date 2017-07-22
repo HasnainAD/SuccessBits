@@ -2,6 +2,7 @@ package com.hadilawar.successbits;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.net.Uri;
@@ -14,7 +15,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import static com.bumptech.glide.request.RequestOptions.circleCropTransform;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.FitCenter;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 
 public class MainFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_LAYOUT="layout";
@@ -51,10 +58,31 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
         mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
 
-        String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
+        final String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
         mTextview.setText(text);
         speakMe = new SpeakQuote();
         speaking = false;
+
+        Glide.with(this)
+               .load(R.drawable.jet)
+                .apply(circleCropTransform())
+                .into((ImageView) fragmentView.findViewById(R.id.authorImage));
+
+         ImageView share = (ImageView) fragmentView.findViewById(R.id.shareimage);
+
+           share.setOnClickListener(new View.OnClickListener() {
+
+               @Override
+               public void onClick(View v) {
+
+                   Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
+                   Intent sendIntent = new Intent();
+                   sendIntent.setAction(Intent.ACTION_SEND);
+                   sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+                   sendIntent.setType("text/plain");
+                   getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
+               }
+           });
         mImageView = (ImageView) fragmentView.findViewById(R.id.speak);
         mImageView.setOnClickListener(this);
         return(fragmentView);
@@ -65,6 +93,9 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     public void onClick(View v) {
 
         String quote = mTextview.getText().toString();
+
+
+
         if(!(speakMe.getStatus() == AsyncTask.Status.RUNNING) ){
 
 

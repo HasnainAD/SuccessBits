@@ -3,15 +3,15 @@
 
     <item
         android:duration="200"
-        android:drawable="@drawable/speaker_1"/>
+        android:drawable="@drawable/speaker1"/>
 
     <item
         android:duration="200"
-        android:drawable="@drawable/speaker_2"/>
+        android:drawable="@drawable/speaker2"/>
 
     <item
         android:duration="200"
-        android:drawable="@drawable/speaker_3"/>
+        android:drawable="@drawable/speaker"/>
 
 
 </animation-list>

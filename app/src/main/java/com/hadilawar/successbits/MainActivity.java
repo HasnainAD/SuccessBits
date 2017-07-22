@@ -1,6 +1,8 @@
 package com.hadilawar.successbits;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
@@ -33,23 +35,31 @@ public class MainActivity extends AppCompatActivity {
     private QuoteData quoteData;
     private final int CHECK_CODE = 0x1;
     private List<QuoteData> list = new ArrayList<>();
+    private SharedPreferences sharedPref;// = getActivity().getPreferences(Context.MODE_PRIVATE);
+    SharedPreferences.Editor editor;//
     private Speaker speaker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mFirebaseDatabase.setPersistenceEnabled(true);
+
+
+
+        mFirebaseDatabase = Utils.getDatabase();
         mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
 
+        //check and Install TTS
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
+        if(!ttsInstalled)
+             checkTTS();
 
-        // tts = new Speaker(this);
-        checkTTS();
+
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new FragmentAdapter(getFragmentManager(), list);
         viewPager.setAdapter(adapter);
-        //check and Install TTS
+
 
 
         mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
@@ -123,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        speaker.destroy();
         super.onDestroy();
     }
 
@@ -137,7 +146,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CHECK_CODE){
             if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
-                speaker = new Speaker(this);
+
+                editor = sharedPref.edit();
+                editor.putBoolean("TTS", true);
+                editor.commit();
             }else {
                 Intent install = new Intent();
                 install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
