@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background2"
+    android:background="@drawable/background5"
     tools:context="com.hadilawar.successbits.MainFragment">
 
 
@@ -26,17 +26,18 @@
         android:id="@+id/shareimage"/>
 
     <TextView
+        android:id="@+id/quotetext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="25dp"
+        android:paddingBottom="5dp"
+        android:layout_marginRight="25dp"
+        android:inputType="text|textMultiLine"
         android:text="Dont try to be someone else, be yourself,\n everyone else is taken\n\t\t\t\t\t\t\t\t\t\t\t\tDilawar"
-        android:id="@+id/quotetext"
-        android:textSize="25dp"
-        android:fontFamily="cursive"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold"
-        />
+        android:textColor="#ffffffff"
+        android:textSize="18sp" />
 
     <ImageView
         android:id="@+id/speak"
@@ -46,14 +47,15 @@
         android:layout_below="@+id/quotetext"
         android:layout_marginTop="14dp"
         android:layout_marginRight="10dp"
-        app:srcCompat="@drawable/speaker60" />
+        android:background="@drawable/speaker_anim"
+       />
 
     <ImageView
         android:id="@+id/authorImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_above="@+id/quotetext"
-        android:layout_marginBottom="35dp"
+        android:layout_marginBottom="30dp"
         android:layout_toEndOf="@+id/imageView"
         app:srcCompat="@drawable/jet" />
 

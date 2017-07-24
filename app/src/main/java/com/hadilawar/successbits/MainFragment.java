@@ -1,27 +1,24 @@
 package com.hadilawar.successbits;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.Image;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import static com.bumptech.glide.request.RequestOptions.circleCropTransform;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 
-import jp.wasabeef.glide.transformations.CropCircleTransformation;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
+import java.util.HashMap;
 
 public class MainFragment extends Fragment implements View.OnClickListener{
     private static final String ARG_LAYOUT="layout";
@@ -30,8 +27,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private ImageView mImageView;
     private TextView mTextview;
     boolean speaking;
-    private SpeakQuote speakMe;
-
+    private TextToSpeech tts;
 
     //Returns an Instance of fragment
     static Fragment newInstance(int layoutId, QuoteData quoteData) {
@@ -55,12 +51,16 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                              ViewGroup container,
                              Bundle savedInstanceState) {
         speaker = new Speaker(getActivity());
+        tts = new TextToSpeech(getActivity(), speaker);
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
         mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf");
 
+        mTextview.setTypeface(typeface);
+        mTextview.setLineSpacing(2f,0.7f);
+       // mTextview.setLineSpaci;ineS
         final String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
         mTextview.setText(text);
-        speakMe = new SpeakQuote();
         speaking = false;
 
         Glide.with(this)
@@ -85,6 +85,38 @@ public class MainFragment extends Fragment implements View.OnClickListener{
            });
         mImageView = (ImageView) fragmentView.findViewById(R.id.speak);
         mImageView.setOnClickListener(this);
+        final AnimationDrawable  am = (AnimationDrawable) mImageView.getBackground();
+
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+                AnimationDrawable am = (AnimationDrawable) mImageView.getBackground();
+               //mImageView.setImageResource(R.drawable.speaking);
+                if(am!=null){
+                   // am.start();
+                    }
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        Log.e("UI thread", "I am the UI thread");
+                        mImageView.setImageResource(R.drawable.speak);
+                        if(am!=null)
+                          //  am.stop();
+                        Toast.makeText(getActivity(),"hapakalo",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
+            }
+        });
         return(fragmentView);
 
     }
@@ -93,25 +125,42 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     public void onClick(View v) {
 
         String quote = mTextview.getText().toString();
+      //if false
+        if(!speaking){
+            speaking = true;
+            speak(quote);
+            mImageView.setImageResource(R.drawable.speaking);
 
+        }else{
+            tts.stop();
+            speaking = false;
+            mImageView.setImageResource(R.drawable.speak);
 
+        }
 
-        if(!(speakMe.getStatus() == AsyncTask.Status.RUNNING) ){
+    }
 
+    public void speak(String text){
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"messageID");
 
-            ((AnimationDrawable) mImageView.getBackground()).start();
-            Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
-            speakMe = new SpeakQuote();
-            speakMe.execute(quote);
-
-        }else {
-            ((AnimationDrawable) mImageView.getBackground()).stop();
-            speakMe.cancel(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+        }else{
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, map);
         }
     }
 
-    private class SpeakQuote extends AsyncTask<String, Void, Void>
+
+    /*private class SpeakQuote extends AsyncTask<String, Void, Void>
     {
+        @Override
+        protected void onPreExecute() {
+            mImageView.setImageResource(R.drawable.speaking);
+            speaking = true;
+            super.onPreExecute();
+        }
+
         @Override
         protected Void doInBackground(String... params) {
 
@@ -123,9 +172,11 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            ((AnimationDrawable) mImageView.getBackground()).stop();
+            //((AnimationDrawable) mImageView.getBackground()).stop();
+            mImageView.setImageResource(R.drawable.speak);
             speaking = false;
             super.onPostExecute(aVoid);
         }
-    }
+    }*/
+
 }
