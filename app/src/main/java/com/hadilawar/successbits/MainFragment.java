@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +27,12 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private QuoteData quoteData;
     private Speaker speaker;
     private ImageView mImageView;
+    private ImageView bottomSheetUp;
     private TextView mTextview;
+    private TextView mAboutTitleText;
+    private TextView mAboutText;
+    private BottomSheetBehavior mBottomSheetBehavior;
+    private FloatingActionButton speakFloatingButton;
     boolean speaking;
     private TextToSpeech tts;
 
@@ -53,15 +60,63 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         speaker = new Speaker(getActivity());
         tts = new TextToSpeech(getActivity(), speaker);
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
-        mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf");
 
+        mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
+        mAboutTitleText =(TextView)fragmentView.findViewById(R.id.aboutauthortitle);
+        mAboutText =(TextView)fragmentView.findViewById(R.id.aboutauthortext);
+        speakFloatingButton = (FloatingActionButton) fragmentView.findViewById(R.id.speakfloatingbutton);
+
+
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Satisfy-Regular.ttf");
         mTextview.setTypeface(typeface);
-        mTextview.setLineSpacing(2f,0.7f);
+        //mTextview.setLineSpacing(2f,0.7f);
+
+        Typeface typeface2 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-semibold.ttf");
+        mAboutTitleText.setTypeface(typeface2);
+
+        Typeface typeface3 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf");
+        mAboutText.setTypeface(typeface3);
+
        // mTextview.setLineSpaci;ineS
         final String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
         mTextview.setText(text);
         speaking = false;
+        bottomSheetUp = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
+
+        View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mBottomSheetBehavior.setPeekHeight(100);
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                   // bottomSheetUp.setImageResource(R.drawable.up);
+                }
+                else if ( newState == BottomSheetBehavior.STATE_EXPANDED)
+                {
+                   // bottomSheetUp.setImageResource(R.drawable.down);
+                }
+
+            }
+
+            @Override
+            public void onSlide(View bottomSheet, float slideOffset) {
+
+                //Bottom Sheet moving up
+                if(slideOffset > 0.5f) {
+                    bottomSheetUp.setImageResource(R.drawable.down);
+                    speakFloatingButton.setVisibility(View.INVISIBLE);
+                }else {
+                    bottomSheetUp.setImageResource(R.drawable.up);
+                    speakFloatingButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+
+
 
         Glide.with(this)
                .load(R.drawable.jet)

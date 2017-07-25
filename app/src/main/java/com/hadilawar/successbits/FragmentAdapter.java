@@ -23,7 +23,7 @@ public class FragmentAdapter extends FragmentPagerAdapter {
     }
     @Override
     public Fragment getItem(int position) {
-        return MainFragment.newInstance(R.layout.fragment_main, list.get(position));
+        return MainFragment.newInstance(R.layout.fragment, list.get(position));
 
     }
 
