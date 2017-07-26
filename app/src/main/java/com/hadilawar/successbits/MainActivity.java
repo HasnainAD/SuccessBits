@@ -3,12 +3,21 @@ package com.hadilawar.successbits;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -38,29 +47,54 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPref;// = getActivity().getPreferences(Context.MODE_PRIVATE);
     SharedPreferences.Editor editor;//
     private Speaker speaker;
+    private TextView titleText;
+    private NavigationView nvDrawer;
+    private ActionBarDrawerToggle drawerToggle;
+    private DrawerLayout mDrawerLayout;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        titleText =(TextView) findViewById(R.id.appnametext);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
-
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Pacifico-Regular.ttf");
+        titleText.setTypeface(typeface);
 
         mFirebaseDatabase = Utils.getDatabase();
         mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
-
         //check and Install TTS
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+
         boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
         if(!ttsInstalled)
              checkTTS();
 
 
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
+
+
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new FragmentAdapter(getFragmentManager(), list);
         viewPager.setAdapter(adapter);
-
-
 
         mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
             @Override
@@ -95,41 +129,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-);
-
-
-
-
-
-
-//
-//       tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-//            @Override
-//            public void onInit(int status) {
-//                if (status == TextToSpeech.SUCCESS) {
-//                    int result = tts.setLanguage(Locale.UK);
-//                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                        Log.e("TTS", "This Language is not supported");
-//                    }
-//
-//                    //speak(list);
-//
-//                } else {
-//                    Log.e("TTS", "Initilization Failed!");
-//                }
-//            }
-//        });
-
-
-
+            );
     }
-//    private void speak(String text){
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-//        }else{
-//            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-//        }
-//    }
 
     @Override
     public void onDestroy() {
@@ -158,12 +159,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void speakQuote(View view) {
-        //fetch code and speak karo
-        ImageView img = (ImageView) view;
-        view.setClickable(false);
-        ((AnimationDrawable) img.getBackground()).start();
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch (id) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
 

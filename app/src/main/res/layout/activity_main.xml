@@ -1,17 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.hadilawar.successbits.MainActivity">
 
-    <android.support.v4.view.ViewPager
+<android.support.v4.widget.DrawerLayout
+android:id="@+id/drawer_layout"
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true">
+
+    <android.support.design.widget.CoordinatorLayout
+
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/pager"
-        >
+        android:layout_height="match_parent">
+
+
+
+        <android.support.v4.view.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/pager"
+            >
 
         </android.support.v4.view.ViewPager>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#01000000"
+            app:theme="@style/CustomActionBar" >
 
-</FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Be Infinite"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:textColor="#FFF"
+                android:id="@+id/appnametext"
+                android:textSize="25sp"/>
+
+            </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+
+
+    <android.support.design.widget.NavigationView
+    android:id="@+id/navigation_view"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#22000000"
+    app:itemIconTint="@color/menu_text_color"
+    app:itemTextColor="@color/menu_text_color"
+    app:itemBackground="@drawable/menu_background_color"
+    app:headerLayout="@layout/drawer_header"
+    app:menu="@menu/drawer"/>
+
+</android.support.v4.widget.DrawerLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

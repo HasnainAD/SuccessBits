@@ -10,6 +10,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,18 +29,18 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private Speaker speaker;
     private ImageView mImageView;
     private ImageView bottomSheetUp;
-    private TextView mTextview;
+    private TextView mQuoteTextview;
     private TextView mAboutTitleText;
+    private TextView mAuthorNameText;
     private TextView mAboutText;
     private BottomSheetBehavior mBottomSheetBehavior;
     private FloatingActionButton speakFloatingButton;
-    boolean speaking;
+    private boolean speaking;
     private TextToSpeech tts;
 
     //Returns an Instance of fragment
     static Fragment newInstance(int layoutId, QuoteData quoteData) {
         Fragment result=new MainFragment();
-        //quoteData = quoteDat;
         Bundle args=new Bundle();
         args.putInt(ARG_LAYOUT, layoutId);
         args.putString("quote", quoteData.getQuote());
@@ -61,14 +62,20 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         tts = new TextToSpeech(getActivity(), speaker);
         View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
 
-        mTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
+        mQuoteTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
         mAboutTitleText =(TextView)fragmentView.findViewById(R.id.aboutauthortitle);
         mAboutText =(TextView)fragmentView.findViewById(R.id.aboutauthortext);
+        mAuthorNameText = (TextView)fragmentView.findViewById(R.id.authorName);
+
         speakFloatingButton = (FloatingActionButton) fragmentView.findViewById(R.id.speakfloatingbutton);
 
 
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Satisfy-Regular.ttf");
-        mTextview.setTypeface(typeface);
+
+        Typeface typefac = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf");
+        mAuthorNameText.setTypeface(typefac);
+
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf");
+        mQuoteTextview.setTypeface(typeface);
         //mTextview.setLineSpacing(2f,0.7f);
 
         Typeface typeface2 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-semibold.ttf");
@@ -76,41 +83,40 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
         Typeface typeface3 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf");
         mAboutText.setTypeface(typeface3);
+        mAboutText.setMovementMethod(new ScrollingMovementMethod());
 
        // mTextview.setLineSpaci;ineS
-        final String text = (String)getArguments().get("quote") +"\n\t\t\t"+getArguments().get("author");
-        mTextview.setText(text);
+        final String text = "\""+(String)getArguments().get("quote") +".\"";
+        mQuoteTextview.setText(text);
         speaking = false;
         bottomSheetUp = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
 
         View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setPeekHeight(100);
+        mBottomSheetBehavior.setPeekHeight(80);
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                   // bottomSheetUp.setImageResource(R.drawable.up);
-                }
-                else if ( newState == BottomSheetBehavior.STATE_EXPANDED)
-                {
-                   // bottomSheetUp.setImageResource(R.drawable.down);
-                }
+//                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+//                  // bottomSheetUp.setImageResource(R.drawable.up);
+//                }
+//                else if ( newState == BottomSheetBehavior.STATE_EXPANDED)
+//                {
+//                    //bottomSheetUp.setImageResource(R.drawable.down);
+//                }
 
             }
 
             @Override
             public void onSlide(View bottomSheet, float slideOffset) {
 
-                //Bottom Sheet moving up
+              //  Bottom Sheet moving up
                 if(slideOffset > 0.5f) {
                     bottomSheetUp.setImageResource(R.drawable.down);
-                    speakFloatingButton.setVisibility(View.INVISIBLE);
                 }else {
                     bottomSheetUp.setImageResource(R.drawable.up);
-                    speakFloatingButton.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -119,7 +125,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
 
         Glide.with(this)
-               .load(R.drawable.jet)
+               .load(R.drawable.tony)
                 .apply(circleCropTransform())
                 .into((ImageView) fragmentView.findViewById(R.id.authorImage));
 
@@ -138,9 +144,9 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                    getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
                }
            });
-        mImageView = (ImageView) fragmentView.findViewById(R.id.speak);
+        mImageView = (ImageView) fragmentView.findViewById(R.id.speakimage);
         mImageView.setOnClickListener(this);
-        final AnimationDrawable  am = (AnimationDrawable) mImageView.getBackground();
+//        final AnimationDrawable  am = (AnimationDrawable) mImageView.getBackground();
 
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
@@ -158,18 +164,15 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                     public void run() {
                         Log.e("UI thread", "I am the UI thread");
                         mImageView.setImageResource(R.drawable.speak);
-                        if(am!=null)
+                        //if(am!=null)
                           //  am.stop();
                         Toast.makeText(getActivity(),"hapakalo",Toast.LENGTH_SHORT).show();
                     }
                 });
-
-
             }
 
             @Override
             public void onError(String utteranceId) {
-
             }
         });
         return(fragmentView);
@@ -179,7 +182,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View v) {
 
-        String quote = mTextview.getText().toString();
+        String quote = mQuoteTextview.getText().toString();
       //if false
         if(!speaking){
             speaking = true;
