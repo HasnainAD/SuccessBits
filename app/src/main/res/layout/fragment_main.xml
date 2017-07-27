@@ -32,7 +32,6 @@
         android:layout_marginTop="10dp"
         app:srcCompat="@drawable/favorite"
         android:layout_marginLeft="10dp"
-        android:background="@drawable/action_buttons_background"
         android:padding="8dp"
         android:id="@+id/favimage"
         android:layout_below="@id/quotetext"
@@ -46,7 +45,6 @@
         android:layout_marginTop="10dp"
         app:srcCompat="@drawable/share"
         android:id="@+id/shareimage"
-        android:background="@drawable/action_buttons_background"
         android:padding="8dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/quotetext"
@@ -58,8 +56,9 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         app:srcCompat="@drawable/speak"
-        android:background="@drawable/action_buttons_background"
         android:id="@+id/speakimage"
+        android:foregroundGravity="left"
+
         android:layout_toRightOf="@id/shareimage"
         android:padding="8dp"
         android:layout_below="@id/quotetext"/>

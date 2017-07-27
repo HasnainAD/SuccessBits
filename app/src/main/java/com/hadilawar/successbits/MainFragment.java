@@ -4,12 +4,14 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +30,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private QuoteData quoteData;
     private Speaker speaker;
     private ImageView mImageView;
+    private ImageView mFavView;
     private ImageView bottomSheetUp;
     private TextView mQuoteTextview;
     private TextView mAboutTitleText;
@@ -66,10 +69,11 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         mAboutTitleText =(TextView)fragmentView.findViewById(R.id.aboutauthortitle);
         mAboutText =(TextView)fragmentView.findViewById(R.id.aboutauthortext);
         mAuthorNameText = (TextView)fragmentView.findViewById(R.id.authorName);
+        mFavView = (ImageView) fragmentView.findViewById(R.id.favimage);
+        mImageView = (ImageView) fragmentView.findViewById(R.id.speakimage);
+
 
         speakFloatingButton = (FloatingActionButton) fragmentView.findViewById(R.id.speakfloatingbutton);
-
-
 
         Typeface typefac = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf");
         mAuthorNameText.setTypeface(typefac);
@@ -144,8 +148,10 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                    getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
                }
            });
-        mImageView = (ImageView) fragmentView.findViewById(R.id.speakimage);
+
         mImageView.setOnClickListener(this);
+        mFavView.setOnClickListener(this);
+
 //        final AnimationDrawable  am = (AnimationDrawable) mImageView.getBackground();
 
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -182,18 +188,31 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View v) {
 
-        String quote = mQuoteTextview.getText().toString();
-      //if false
-        if(!speaking){
-            speaking = true;
-            speak(quote);
-            mImageView.setImageResource(R.drawable.speaking);
+        if(v.getId() == R.id.speakimage) {
+            String quote = mQuoteTextview.getText().toString();
+            //if false
+            if (!speaking) {
+                speaking = true;
+                speak(quote);
+                mImageView.setImageResource(R.drawable.speaking);
 
-        }else{
-            tts.stop();
-            speaking = false;
-            mImageView.setImageResource(R.drawable.speak);
+            } else {
+                tts.stop();
+                speaking = false;
+                mImageView.setImageResource(R.drawable.speak);
 
+            }
+        }
+
+        else if (v.getId() == R.id.favimage){
+            ImageView imageView = (ImageView)v;
+             Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
+             Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
+            if(imageView.getDrawable().getConstantState().equals(favorite.getConstantState())){
+                imageView.setImageDrawable(faved);
+            }else{
+                imageView.setImageDrawable(favorite);
+            }
         }
 
     }
