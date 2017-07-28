@@ -1,4 +1,4 @@
-package com.hadilawar.successbits;
+package com.hadilawar.successbits.FragmentsHub;
 
 /**
  * Created by Dilawar on 7/1/2017.

@@ -1,4 +1,4 @@
-package com.hadilawar.successbits;
+package com.hadilawar.successbits.FragmentsHub;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import static com.bumptech.glide.request.RequestOptions.circleCropTransform;
 import com.bumptech.glide.Glide;
+import com.hadilawar.successbits.R;
+import com.hadilawar.successbits.Others.Speaker;
 
 import java.util.HashMap;
 

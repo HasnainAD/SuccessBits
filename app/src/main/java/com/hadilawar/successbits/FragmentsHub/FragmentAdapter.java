@@ -1,11 +1,11 @@
-package com.hadilawar.successbits;
+package com.hadilawar.successbits.FragmentsHub;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.support.v13.app.FragmentPagerAdapter;
 
-import java.util.ArrayList;
+import com.hadilawar.successbits.R;
+
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ public class FragmentAdapter extends FragmentPagerAdapter {
 
    // private Speaker speaker;
     private List<QuoteData> list;
-    FragmentAdapter(FragmentManager fragmentManager, List<QuoteData> list) {
+   public FragmentAdapter(FragmentManager fragmentManager, List<QuoteData> list) {
         super(fragmentManager);
         this.list =list;
         //this.speaker = speaker;

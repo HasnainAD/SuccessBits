@@ -1,14 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background8"
-    tools:context="com.hadilawar.successbits.MainFragment">
-
-
-
-
+    tools:context="com.hadilawar.successbits.FragmentsHub.MainFragment">
 
     <TextView
         android:id="@+id/quotetext"
@@ -20,10 +17,20 @@
         android:layout_marginRight="20dp"
         android:textAlignment="center"
         android:paddingBottom="5dp"
-        android:inputType="text|textMultiLine"
+        android:lineSpacingExtra="-7dp"
         android:text="Dont try to be someone else, be yourself,\n everyone else is taken\n\t\t\t\t\t\t\t\t\t\t\t\tDilawar"
         android:textColor="#ffffffff"
         android:textSize="15sp" />
+
+    <View
+        android:layout_width="80dp"
+        android:layout_height="2dp"
+        android:id="@+id/breaker"
+        android:background="#ffffff"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/quotetext"
+        android:layout_centerHorizontal="true"
+        />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -34,7 +41,7 @@
         android:layout_marginLeft="10dp"
         android:padding="8dp"
         android:id="@+id/favimage"
-        android:layout_below="@id/quotetext"
+        android:layout_below="@id/breaker"
         android:layout_toLeftOf="@+id/shareimage"
         />
 
@@ -47,7 +54,7 @@
         android:id="@+id/shareimage"
         android:padding="8dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/quotetext"
+        android:layout_below="@id/breaker"
         />
 
     <ImageView
@@ -58,10 +65,9 @@
         app:srcCompat="@drawable/speak"
         android:id="@+id/speakimage"
         android:foregroundGravity="left"
-
         android:layout_toRightOf="@id/shareimage"
         android:padding="8dp"
-        android:layout_below="@id/quotetext"/>
+        android:layout_below="@id/breaker"/>
 
 
 
@@ -83,6 +89,8 @@
         android:layout_marginBottom="10dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/quotetext"/>
+
+
 
 
 </RelativeLayout>

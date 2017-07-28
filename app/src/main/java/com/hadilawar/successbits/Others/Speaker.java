@@ -1,4 +1,4 @@
-package com.hadilawar.successbits;
+package com.hadilawar.successbits.Others;
 
 import android.content.Context;
 import android.os.Build;
