@@ -30,7 +30,7 @@ public class FavoriteActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.tool);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
 

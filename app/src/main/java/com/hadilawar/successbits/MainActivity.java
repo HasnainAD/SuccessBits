@@ -3,8 +3,10 @@ package com.hadilawar.successbits;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -28,7 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.hadilawar.successbits.FavoritesHub.FavoriteActivity;
 import com.hadilawar.successbits.FragmentsHub.FragmentAdapter;
 import com.hadilawar.successbits.FragmentsHub.QuoteData;
-import com.hadilawar.successbits.Others.FBUtils;
+import com.hadilawar.successbits.Firebases.FBUtils;
 import com.hadilawar.successbits.Others.Speaker;
 
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private final int CHECK_CODE = 0x1;
     private List<QuoteData> list = new ArrayList<>();
     private SharedPreferences sharedPref;// = getActivity().getPreferences(Context.MODE_PRIVATE);
-    SharedPreferences.Editor editor;//
+    private SharedPreferences.Editor editor;//
     private Speaker speaker;
     private TextView titleText;
     private NavigationView nvDrawer;
@@ -66,13 +68,13 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
-        titleText =(TextView) findViewById(R.id.appnametext);
+//        titleText =(TextView) findViewById(R.id.appnametext);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Pacifico-Regular.ttf");
-        titleText.setTypeface(typeface);
+        navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
+//        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Pacifico-Regular.ttf");
+//        titleText.setTypeface(typeface);
 
         mFirebaseDatabase = FBUtils.getDatabase();
         mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
+                startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                 Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
                 return true;
             }
@@ -102,11 +105,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 quoteData =dataSnapshot.getValue(QuoteData.class);
-
                 list.add(quoteData);
                 adapter.notifyDataSetChanged();
+                viewPager.setCurrentItem(list.size()-1, true);
                 if(list.size() >=2)
-                    //speaker.speak((list.get(1)).getQuote());
                 Toast.makeText(MainActivity.this,quoteData.getQuote(),Toast.LENGTH_SHORT).show();
 
             }
@@ -130,8 +132,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        }
-            );
+        });
     }
 
     @Override
@@ -188,5 +189,40 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-}
 
+    private class NavigationItemListener implements NavigationView.OnNavigationItemSelectedListener{
+
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+            if(menuItem.getItemId() == R.id.nav_favorite) {
+                menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                return true;
+            }
+            else if(menuItem.getItemId() == R.id.nav_rateus){
+                Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+                startActivity(rateIntent);
+                return true;
+            }
+            else if(menuItem.getItemId() == R.id.nav_aboutus){
+                menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                startActivity(new Intent(MainActivity.this, AboutUs.class));
+                return true;
+            }
+            else if(menuItem.getItemId() == R.id.nav_share){
+
+
+            }
+            else  if(menuItem.getItemId() == R.id.nav_home){
+
+                if(true){}
+
+            }
+            return false;
+        }
+    }
+}

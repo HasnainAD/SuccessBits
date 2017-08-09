@@ -3,26 +3,26 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_item_attachment"
+            android:id="@+id/nav_home"
             android:checked="true"
             android:icon="@drawable/faved"
-            android:title="@string/nav_item_attachment" />
+            android:title="Home" />
         <item
-            android:id="@+id/navigation_item_images"
+            android:id="@+id/nav_favorite"
             android:icon="@drawable/faved"
-            android:title="@string/nav_item_images" />
+            android:title="@string/nav_item_favorite"/>
         <item
-            android:id="@+id/navigation_item_loion"
+            android:id="@+id/nav_aboutus"
             android:icon="@drawable/faved"
-            android:title="@string/nav_item_location" />
+            android:title="About Us" />
         <item
-            android:id="@+id/navi"
+            android:id="@+id/nav_rateus"
             android:icon="@drawable/faved"
-            android:title="@string/nav_item_images" />
+            android:title="Rate Us" />
         <item
-            android:id="@+id/navigation_item_location"
+            android:id="@+id/nav_share"
             android:icon="@drawable/faved"
-            android:title="@string/nav_item_location" />
+            android:title="Share" />
 
     </group>
 

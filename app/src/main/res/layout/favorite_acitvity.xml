@@ -14,7 +14,19 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="@color/colorPrimary"
-        app:theme="@style/CustomActionBar" />
+        app:theme="@style/CustomActionBar"
+    >
+
+        <com.hadilawar.successbits.Others.LogoTextView
+            android:id="@+id/favTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Favorites"
+            android:textColor="#FFF"
+            android:textSize="20sp"
+             />
+        </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/my_recycler_view"

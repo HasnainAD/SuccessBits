@@ -31,17 +31,20 @@ public class DBHelper extends SQLiteOpenHelper{
                         "(id integer primary key, author text, quote text)"
         );
 
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(AuthorColumn, "Tony Robbins");
         contentValues.put(QuoteColumn, "What makes you comfortable can ruin you, what makes you uncomfortable is the only way to grow");
         db.insert(TableName, null, contentValues);
+
         ContentValues contentValues2 = new ContentValues();
         contentValues2.put(AuthorColumn, "Maxwell johns");
         contentValues2.put(QuoteColumn, "I need to move then I will began to feel the movement");
-        db.insert(TableName, null, contentValues);
+        db.insert(TableName, null, contentValues2);
 
-
+        ContentValues contentValues3 = new ContentValues();
+        contentValues3.put(AuthorColumn, "Maxwell johns");
+        contentValues3.put(QuoteColumn, "I need to move and then I will began to feel the movement");
+        db.insert(TableName, null, contentValues3);
     }
 
     @Override

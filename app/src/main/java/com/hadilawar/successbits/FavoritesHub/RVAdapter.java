@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hadilawar.successbits.R;
@@ -40,20 +41,26 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
 
         FavItem item = mItems.get(i);
+        final int position = i;
+
         Typeface reg = Typeface.createFromAsset(context.getAssets(), "fonts/lemonada-regular.ttf");
         Typeface light = Typeface.createFromAsset(context.getAssets(), "fonts/Lemonada-Light.ttf");
+
         viewHolder.authorTextView.setText(item.getAuthor());
         viewHolder.authorTextView.setTypeface(reg);
         viewHolder.quoteTextView.setText(item.getQuote());
         viewHolder.quoteTextView.setTypeface(light);
 
-//        viewHolder.mTextView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//              Context context = view.getContext();
-//              context.startActivity(new Intent(context, SecondActivity.class));
-//            }
-//        });
+        viewHolder.deleteImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mItems.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, mItems.size());
+
+            }
+        });
 
     }
 
@@ -66,11 +73,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
 
         private final TextView authorTextView;
         private final TextView quoteTextView;
+        private final ImageView deleteImageView;
 
         ViewHolder(View v) {
             super(v);
             authorTextView = (TextView) v.findViewById(R.id.favauthor);
             quoteTextView = (TextView) v.findViewById(R.id.favquote);
+            deleteImageView = (ImageView) v.findViewById(R.id.favdelete);
         }
     }
 }

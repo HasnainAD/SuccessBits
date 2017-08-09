@@ -30,7 +30,7 @@ android:fitsSystemWindows="true">
             android:background="#01000000"
             app:theme="@style/CustomActionBar" >
 
-            <TextView
+            <com.hadilawar.successbits.Others.LogoTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Be Infinite"
