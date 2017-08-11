@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.settings:
-                startActivity(new Intent(this, FavoriteActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
 
         }
