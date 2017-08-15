@@ -12,6 +12,7 @@ import android.speech.tts.UtteranceProgressListener;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.NotificationCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -43,7 +44,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private FloatingActionButton speakFloatingButton;
     private boolean speaking;
     private TextToSpeech tts;
-
+    private int position;
     private String imageUrl;
     private String quoteText;
     private String authorName;
@@ -51,13 +52,14 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
 
     //Returns an Instance of fragment
-    static Fragment newInstance(int layoutId, QuoteData quoteData) {
+    static Fragment newInstance(int position, QuoteData quoteData) {
         Fragment result=new MainFragment();
         Bundle args=new Bundle();
-        args.putInt(ARG_LAYOUT, layoutId);
+        //args.putInt(ARG_LAYOUT, layoutId);
         args.putString("quote", quoteData.getQuote());
         args.putString("author", quoteData.getAuthorName());
         args.putString("imgurl", quoteData.getImageUrl());
+        args.putInt("position", position);
         result.setArguments(args);
         return(result);
     }
@@ -73,11 +75,13 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
         speaker = new Speaker(getActivity());
         tts = new TextToSpeech(getActivity(), speaker);
-        View fragmentView = inflater.inflate(getArguments().getInt(ARG_LAYOUT),container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment,container, false);
+        ViewPager mViewpager= (ViewPager) getActivity().findViewById(R.id.pager);
 
         quoteText = "\""+(String)getArguments().get("quote") +".\"";
         authorName = getArguments().getString("author");
         imageUrl = getArguments().getString("imgurl");
+        position = getArguments().getInt("position");
         speaking = false;
 
         mQuoteTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
@@ -107,7 +111,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
         bottomSheetImageView = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
 
-        View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
+        final View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(80);
 
@@ -137,6 +141,30 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             }
         });
 
+        mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if(state == ViewPager.SCROLL_STATE_DRAGGING){
+
+                    if(mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                    {
+                        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                    }
+
+                }
+            }
+        });
         Glide.with(this)
                .load(R.drawable.tony)
                 .apply(circleCropTransform())
