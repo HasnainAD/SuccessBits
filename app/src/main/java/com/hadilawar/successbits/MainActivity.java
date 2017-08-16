@@ -3,6 +3,7 @@ package com.hadilawar.successbits;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -47,92 +48,118 @@ public class MainActivity extends AppCompatActivity {
     private final int CHECK_CODE = 0x1;
     private List<QuoteData> list = new ArrayList<>();
     private SharedPreferences sharedPref;// = getActivity().getPreferences(Context.MODE_PRIVATE);
+    private SharedPreferences prefs;
     private SharedPreferences.Editor editor;//
     private Speaker speaker;
     private TextView titleText;
     private NavigationView nvDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout mDrawerLayout;
+    private boolean activityAvailable;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        prefs = getSharedPreferences("com.hadilawar.successbits", MODE_PRIVATE);
+        if (prefs.getBoolean("firstrun", true)) {
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayHomeAsUpEnabled(true);
+            if(isNetworkConnected()){
+                setContentView(R.layout.activity_main);
+                activityAvailable = true;
+                prefs.edit().putBoolean("firstrun", false).commit();
+            }
+            else {
+                setContentView(R.layout.activity_main_alternate);
+                activityAvailable = false;
+                prefs.edit().putBoolean("firstrun", true).commit();
+            }
+
+        }
+        else{
+            setContentView(R.layout.activity_main);
+            activityAvailable = true;
+        }
+
+        if (activityAvailable){
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(true);
 //        titleText =(TextView) findViewById(R.id.appnametext);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
+            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+            sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+            navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
 //        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Pacifico-Regular.ttf");
 //        titleText.setTypeface(typeface);
+            mFirebaseDatabase = FBUtils.getDatabase();
+            mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
 
-        mFirebaseDatabase = FBUtils.getDatabase();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
-        //check and Install TTS
-
-        boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
-        if(!ttsInstalled)
-             checkTTS();
-
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                menuItem.setChecked(true);
-                mDrawerLayout.closeDrawers();
-                startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
-                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
-                return true;
-            }
-        });
+            //check and Install TTS
+            boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
+            if (!ttsInstalled)
+                checkTTS();
+            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    menuItem.setChecked(true);
+                    mDrawerLayout.closeDrawers();
+                    startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
+                    Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            });
 
 
-        viewPager = (ViewPager) findViewById(R.id.pager);
-        adapter = new FragmentAdapter(getFragmentManager(), list);
-        viewPager.setAdapter(adapter);
+            viewPager = (ViewPager) findViewById(R.id.pager);
+            adapter = new FragmentAdapter(getFragmentManager(), list);
+            viewPager.setAdapter(adapter);
+            mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    quoteData = dataSnapshot.getValue(QuoteData.class);
+                    list.add(quoteData);
+                    adapter.notifyDataSetChanged();
+                    viewPager.setCurrentItem(list.size() - 1, true);
+                    if (list.size() >= 2)
+                        Toast.makeText(MainActivity.this, quoteData.getQuote(), Toast.LENGTH_SHORT).show();
 
-        mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                quoteData =dataSnapshot.getValue(QuoteData.class);
-                list.add(quoteData);
-                adapter.notifyDataSetChanged();
-                viewPager.setCurrentItem(list.size()-1, true);
-                if(list.size() >=2)
-                Toast.makeText(MainActivity.this,quoteData.getQuote(),Toast.LENGTH_SHORT).show();
+                }
 
-            }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                }
 
-            }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                }
 
-            }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                }
 
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                }
+            });
 
-            }
-        });
+        }
+
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     @Override
@@ -141,23 +168,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkTTS(){
-        Intent check = new Intent();
-        check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(check, CHECK_CODE);
+        if(activityAvailable){
+            Intent check = new Intent();
+            check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(check, CHECK_CODE);
+          }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == CHECK_CODE){
-            if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
-
-                editor = sharedPref.edit();
-                editor.putBoolean("TTS", true);
-                editor.commit();
-            }else {
-                Intent install = new Intent();
-                install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(install);
+        if(activityAvailable){
+            if(requestCode == CHECK_CODE){
+                if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
+                    editor = sharedPref.edit();
+                    editor.putBoolean("TTS", true);
+                    editor.commit();
+                }else {
+                    Intent install = new Intent();
+                    install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    startActivity(install);
+                }
             }
         }
     }
@@ -166,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        if(activityAvailable)
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
