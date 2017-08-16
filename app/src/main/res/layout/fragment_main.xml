@@ -72,6 +72,7 @@
         app:srcCompat="@drawable/speak"
         android:id="@+id/speakimage"
         android:foregroundGravity="left"
+        android:textAlignment="textStart"
         android:padding="8dp"
         tools:layout_constraintTop_creator="1"
         android:layout_marginStart="11dp"
