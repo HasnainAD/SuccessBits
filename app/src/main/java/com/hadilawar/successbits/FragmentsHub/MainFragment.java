@@ -49,7 +49,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private String quoteText;
     private String authorName;
     private NotificationCompat.Builder mBuilder;
-
+    private ImageView shareIcon;
 
     //Returns an Instance of fragment
     static Fragment newInstance(int position, QuoteData quoteData) {
@@ -84,37 +84,31 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         position = getArguments().getInt("position");
         speaking = false;
 
+        //FIND WIDGETS
         mQuoteTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
         mAboutTitleText =(TextView)fragmentView.findViewById(R.id.aboutauthortitle);
         mAboutText =     (TextView)fragmentView.findViewById(R.id.aboutauthortext);
         mAuthorNameText =(TextView)fragmentView.findViewById(R.id.authorName);
-
         mFavView =       (ImageView)fragmentView.findViewById(R.id.favimage);
         mImageView =     (ImageView)fragmentView.findViewById(R.id.speakimage);
-
-        Typeface typefac = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf");
-        mAuthorNameText.setTypeface(typefac);
-
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf");
-        mQuoteTextview.setTypeface(typeface);
-        //mTextview.setLineSpacing(2f,0.7f);
-
-        Typeface typeface2 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-semibold.ttf");
-        mAboutTitleText.setTypeface(typeface2);
-
-        Typeface typeface3 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf");
-        mAboutText.setTypeface(typeface3);
-      //  mAboutText.setMovementMethod(new ScrollingMovementMethod());
+        shareIcon =      (ImageView) fragmentView.findViewById(R.id.shareimage);
 
 
+        //SET TYPEFACE OF TEXTVIEWS
+        mAuthorNameText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf"));
+        mQuoteTextview.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf"));
+        mAboutTitleText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-semibold.ttf"));
+        mAboutText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf"));
+
+        //SET TEXT
         mQuoteTextview.setText(quoteText);
+        mAuthorNameText.setText(authorName);
 
+        //ALL BOTTOMSHEETS
         bottomSheetImageView = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
-
         final View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(80);
-
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -141,6 +135,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             }
         });
 
+        //FRAGMENT CHANGE LISTENER
         mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -155,24 +150,23 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onPageScrollStateChanged(int state) {
                 if(state == ViewPager.SCROLL_STATE_DRAGGING){
-
                     if(mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
                     {
                         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
                     }
-
                 }
             }
         });
+
+        //DOWNLOADING WITH GLIDE
+        //// TODO: 8/19/2017 SET URL HERE
         Glide.with(this)
                .load(R.drawable.tony)
                 .apply(circleCropTransform())
                 .into((ImageView) fragmentView.findViewById(R.id.authorImage));
 
-         ImageView shareIcon = (ImageView) fragmentView.findViewById(R.id.shareimage);
-
-           shareIcon.setOnClickListener(new View.OnClickListener() {
+        //SHARE ACTION SET
+         shareIcon.setOnClickListener(new View.OnClickListener() {
 
                @Override
                public void onClick(View v) {
@@ -187,6 +181,8 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
         mImageView.setOnClickListener(this);
         mFavView.setOnClickListener(this);
+
+        //SPEECH START AND END LISTENER
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {

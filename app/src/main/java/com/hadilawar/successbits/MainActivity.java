@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        //View view = findViewById(R.id.)
+
+
         prefs = getSharedPreferences("com.hadilawar.successbits", MODE_PRIVATE);
         if (prefs.getBoolean("firstrun", true)) {
 
@@ -126,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
                     list.add(quoteData);
                     adapter.notifyDataSetChanged();
                     viewPager.setCurrentItem(list.size() - 1, true);
+
+                    // TODO: 8/20/2017  fetch
+
                     if (list.size() >= 2)
                         Toast.makeText(MainActivity.this, quoteData.getQuote(), Toast.LENGTH_SHORT).show();
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.hadilawar.successbits.FavoritesHub.FavItem;
 
@@ -28,7 +29,7 @@ public class DBHelper extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table " + TableName + " "+
-                        "(id integer primary key, author text, quote text)"
+                        "(id integer primary key AUTOINCREMENT, author text, quote text)"
         );
 
         ContentValues contentValues = new ContentValues();
@@ -45,11 +46,21 @@ public class DBHelper extends SQLiteOpenHelper{
         contentValues3.put(AuthorColumn, "Maxwell johns");
         contentValues3.put(QuoteColumn, "I need to move and then I will began to feel the movement");
         db.insert(TableName, null, contentValues3);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public boolean deleteContact(int ID){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "DELETE FROM "+ TableName + " where id = '"+ Integer.toString(ID)+"'";
+        Log.e("QUERY", query);
+        db.execSQL("DELETE FROM "+ TableName + " where id = '"+ Integer.toString(ID)+"'");
+        db.close();
+        return true;
     }
 
     public boolean insertContact (String author, String quote) {
@@ -58,6 +69,7 @@ public class DBHelper extends SQLiteOpenHelper{
         contentValues.put(AuthorColumn, author);
         contentValues.put(QuoteColumn, quote);
         db.insert(TableName, null, contentValues);
+        db.close();
         return true;
     }
     public ArrayList<FavItem> getAll()
@@ -67,13 +79,18 @@ public class DBHelper extends SQLiteOpenHelper{
         return CursorToArray(cursor);
     }
 
-
     private ArrayList<FavItem> CursorToArray(Cursor res)
     {
         ArrayList array = new ArrayList<FavItem>();
         res.moveToFirst();
         while(res.isAfterLast() == false){
-            array.add(new FavItem(res.getString(res.getColumnIndex("author")), res.getString(res.getColumnIndex("quote"))));
+            array.add(new FavItem(
+                                res.getString(res.getColumnIndex("author")),
+                                res.getString(res.getColumnIndex("quote")),
+                                res.getInt(res.getColumnIndex("id"))));
+            Log.e("ID VALUE :: ",Integer.toString(res.getColumnIndex("id")));
+            Log.e("AUTHOR VALUE :: ",res.getString(res.getColumnIndex("author")));
+            Log.e("QUOTE VALUE :: ",res.getString(res.getColumnIndex("quote")));
             res.moveToNext();
         }
         return array;

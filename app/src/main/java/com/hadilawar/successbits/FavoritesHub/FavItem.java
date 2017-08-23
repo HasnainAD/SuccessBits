@@ -8,15 +8,24 @@ public class FavItem {
 
     private String author;
     private String quote;
+    private int id;
 
 
    public FavItem(){}
 
-   public FavItem(String author,  String quote) {
+   public FavItem(String author,  String quote, int id) {
         this.quote = quote;
+        this.id = id;
         this.author = author;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getAuthor() {
         return author;

@@ -13,15 +13,15 @@
         android:summary="Select your language locale"
         android:key="downloadType"
         android:defaultValue="1"
-        android:entries="@array/listArray"
-        android:entryValues="@array/listValues" />
+        android:entries="@array/localeArray"
+        android:entryValues="@array/localeValues" />
 
     <ListPreference
         android:title="Application BackGround"
         android:summary="Select an engaging background that rhymes with you"
         android:key="downloadType"
         android:defaultValue="1"
-        android:entries="@array/listArray"
-        android:entryValues="@array/listValues" />
+        android:entries="@array/backgroundArray"
+        android:entryValues="@array/backgroundValues" />
 
 </PreferenceScreen>

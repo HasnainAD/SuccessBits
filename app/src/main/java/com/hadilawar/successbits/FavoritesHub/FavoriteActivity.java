@@ -20,7 +20,6 @@ public class FavoriteActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
-    private String[] myDataset = {"hasnian", "dilawar","nagari", "bulzne", "dilawar","nagari", "bulzne", "dilawar","nagari", "bulzne"};
     private ArrayList<FavItem> array;
     private FavsRetriever favsRetriever;
     private DBHelper dbHelper;
@@ -36,33 +35,31 @@ public class FavoriteActivity extends AppCompatActivity {
         setContentView(R.layout.favorite_acitvity);
         dbHelper = new DBHelper(this);
         array = dbHelper.getAll();
-        typeface = Typeface.createFromAsset(getAssets(), "fonts/lemonada-semibold.ttf");
-        emptyTextView.setTypeface(typeface);
+        typeface = Typeface.createFromAsset(getAssets(), "fonts/Lemonada-Light.ttf");
 
+        emptyTextView= (TextView) findViewById(R.id.noItemText);
+        emptyTextView.setTypeface(typeface);
 
         toolbar = (Toolbar) findViewById(R.id.tool);
         setSupportActionBar(toolbar);
+         TextView textView = (TextView) toolbar.findViewById(R.id.favTitleText);
+        textView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lemonada-regular.ttf"));
         actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-
         if(array.isEmpty()){
             mRecyclerView.setVisibility(View.GONE);
         }
         else{
             emptyTextView.setVisibility(View.GONE);
             mRecyclerView.setHasFixedSize(false);
-            mRecyclerView.setAdapter(new RVAdapter(array, this));
+            mRecyclerView.setAdapter(new RVAdapter(array, this, dbHelper));
             mLayoutManager = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(mLayoutManager);
-
         }
-
-
     }
-
     private class FavsRetriever extends AsyncTask<Void, Void ,ArrayList<FavItem>>{
 
         @Override
