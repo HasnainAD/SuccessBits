@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -18,8 +20,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +42,8 @@ import com.hadilawar.successbits.Others.Speaker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,110 +64,150 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout mDrawerLayout;
     private boolean activityAvailable;
-
+    private RelativeLayout alternateView;
+    private  ProgressBar progressBar;
+    private View rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-        //View view = findViewById(R.id.)
-
-
-        prefs = getSharedPreferences("com.hadilawar.successbits", MODE_PRIVATE);
-        if (prefs.getBoolean("firstrun", true)) {
-
-            if(isNetworkConnected()){
-                setContentView(R.layout.activity_main);
-                activityAvailable = true;
-                prefs.edit().putBoolean("firstrun", false).commit();
-            }
-            else {
-                setContentView(R.layout.activity_main_alternate);
-                activityAvailable = false;
-                prefs.edit().putBoolean("firstrun", true).commit();
-            }
-
+        //IF NETWORK IS CONNECTED
+        if(isNetworkConnected()){
+            Toast.makeText(this,"Internet working", Toast.LENGTH_SHORT);
+                setUpActivity();
         }
+        //IF INTERNET IS NOT CONNECTED
         else{
-            setContentView(R.layout.activity_main);
-            activityAvailable = true;
+            prefs = getSharedPreferences("com.hadilawar.successbits", MODE_PRIVATE);
+            //FIRST RUN OF APP
+            if (prefs.getBoolean("firstrun", true)){
+                // final Handler myHandler = new Handler();
+                setContentView(R.layout.activity_main_alternate);
+                View view = findViewById(R.id.alternate);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Log.e("INSIDE CLICK","ITS REALLY WORKING");
+                        Toast.makeText(MainActivity.this,"First run, click, Internet working", Toast.LENGTH_SHORT);
+
+                        progressBar = (ProgressBar) (View)findViewById(R.id.progressBar);
+                        if(isNetworkConnected()){
+                            Toast.makeText(MainActivity.this,"First run, click, Internet working", Toast.LENGTH_SHORT);
+                            progressBar.setVisibility(View.VISIBLE);
+                            SystemClock.sleep(500);
+                            progressBar.setVisibility(View.INVISIBLE);
+                            setUpActivity();
+                            prefs.edit().putBoolean("firstrun", false).commit();
+                        }
+                        else {
+                            Toast.makeText(MainActivity.this, "first run, click, Internet not working", Toast.LENGTH_SHORT).show();
+                            new updateTask().execute();
+                            prefs.edit().putBoolean("firstrun", true).commit();
+                        }
+                    }
+                });
+            }
+            //NOT FIRST RUN OF APP
+            else{
+            setUpActivity();
+            }
         }
 
-        if (activityAvailable){
-            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            ActionBar actionBar = getSupportActionBar();
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+
+//        try{
+//            alternateView = (RelativeLayout)findViewById(R.id.alternate);
+//            alternateView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    //someFunction()
+//                }
+//            });
+//        }
+//        catch (Exception e){
+//            //someFuction();
+//        }
+
+
+
+
+    }
+
+    private  void setUpActivity(){
+
+        setContentView(R.layout.activity_main);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 //        titleText =(TextView) findViewById(R.id.appnametext);
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-            NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-            sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-            navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
 //        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Pacifico-Regular.ttf");
 //        titleText.setTypeface(typeface);
-            mFirebaseDatabase = FBUtils.getDatabase();
-            mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
+        mFirebaseDatabase = FBUtils.getDatabase();
+        mDatabaseReference = mFirebaseDatabase.getReference().child("quotes");
 
-            //check and Install TTS
-            boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
-            if (!ttsInstalled)
-                checkTTS();
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(MenuItem menuItem) {
-                    menuItem.setChecked(true);
-                    mDrawerLayout.closeDrawers();
-                    startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
-                    Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
-                    return true;
-                }
-            });
+        //CHECK AND INSTALL TTS
+        boolean ttsInstalled = sharedPref.getBoolean("TTS", false);
+        if (!ttsInstalled)
+            checkTTS();
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
+                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
 
+        //GET AND SET VIEWPAGER
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        adapter = new FragmentAdapter(getFragmentManager(), list);
+        viewPager.setAdapter(adapter);
+        mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                quoteData = dataSnapshot.getValue(QuoteData.class);
+                list.add(quoteData);
+                adapter.notifyDataSetChanged();
+                viewPager.setCurrentItem(list.size() - 1, true);
 
-            viewPager = (ViewPager) findViewById(R.id.pager);
-            adapter = new FragmentAdapter(getFragmentManager(), list);
-            viewPager.setAdapter(adapter);
-            mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    quoteData = dataSnapshot.getValue(QuoteData.class);
-                    list.add(quoteData);
-                    adapter.notifyDataSetChanged();
-                    viewPager.setCurrentItem(list.size() - 1, true);
+                // TODO: 8/20/2017  fetch
 
-                    // TODO: 8/20/2017  fetch
+                if (list.size() >= 2)
+                    Toast.makeText(MainActivity.this, quoteData.getQuote(), Toast.LENGTH_SHORT).show();
 
-                    if (list.size() >= 2)
-                        Toast.makeText(MainActivity.this, quoteData.getQuote(), Toast.LENGTH_SHORT).show();
+            }
 
-                }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
-                }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
-                }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
-                }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-        }
+            }
+        });
 
     }
 
@@ -263,4 +311,33 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     }
+
+    private class updateTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+
+            progressBar.setVisibility(View.VISIBLE);
+           // super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressBar.setVisibility(View.INVISIBLE);
+           // super.onPostExecute(aVoid);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            long delayInMillis = 4000;
+            Timer timer = new Timer();
+            try {
+                Thread.sleep(delayInMillis);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
 }

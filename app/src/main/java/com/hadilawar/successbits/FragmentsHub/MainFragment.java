@@ -170,7 +170,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
                @Override
                public void onClick(View v) {
-                   Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
+                   //Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
                    Intent sendIntent = new Intent();
                    sendIntent.setAction(Intent.ACTION_SEND);
                    sendIntent.putExtra(Intent.EXTRA_TEXT, quoteText+authorName);
@@ -232,9 +232,12 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             ImageView imageView = (ImageView)v;
              Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
              Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
+
+            //NOT FAVOURITE YET
+            //SO MAKE IT ONE
             if(imageView.getDrawable().getConstantState().equals(favorite.getConstantState())){
                 imageView.setImageDrawable(faved);
-            }else{
+            }else{ //WAS FAVOURITE, UNDO IT
                 imageView.setImageDrawable(favorite);
             }
         }
