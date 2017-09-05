@@ -32,7 +32,7 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/wifi"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"
         android:layout_marginBottom="15dp" />
@@ -50,12 +50,14 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:text="No Connection"
+        android:id="@+id/connectionText"
         android:layout_marginTop="0dp"
         android:layout_below="@+id/wifi"/>vIEW
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/refreshText"
         android:text="click to refresh"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"

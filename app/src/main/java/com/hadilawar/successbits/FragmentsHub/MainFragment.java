@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -24,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import static com.bumptech.glide.request.RequestOptions.circleCropTransform;
 import com.bumptech.glide.Glide;
+import com.hadilawar.successbits.DBHelper;
+import com.hadilawar.successbits.FavoritesHub.FavItem;
 import com.hadilawar.successbits.R;
 import com.hadilawar.successbits.Others.Speaker;
 
@@ -50,6 +53,8 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private String authorName;
     private NotificationCompat.Builder mBuilder;
     private ImageView shareIcon;
+    DBHelper dbHelper;
+    private String quote;
 
     //Returns an Instance of fragment
     static Fragment newInstance(int position, QuoteData quoteData) {
@@ -66,18 +71,18 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
     public MainFragment(){}
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
         speaker = new Speaker(getActivity());
+        dbHelper = new DBHelper(getActivity());
         tts = new TextToSpeech(getActivity(), speaker);
         View fragmentView = inflater.inflate(R.layout.fragment,container, false);
         ViewPager mViewpager= (ViewPager) getActivity().findViewById(R.id.pager);
 
+        quote = (String)getArguments().get("quote");
         quoteText = "\""+(String)getArguments().get("quote") +".\"";
         authorName = getArguments().getString("author");
         imageUrl = getArguments().getString("imgurl");
@@ -104,7 +109,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         mQuoteTextview.setText(quoteText);
         mAuthorNameText.setText(authorName);
 
-        //ALL BOTTOMSHEETS
+        //ALL BOTTOMSHEETS MATERIAL
         bottomSheetImageView = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
         final View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -135,6 +140,9 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             }
         });
 
+        //SET FAVORITE ICON
+        new  CheckAndLoadFavImage().execute(quote);
+
         //FRAGMENT CHANGE LISTENER
         mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -160,25 +168,14 @@ public class MainFragment extends Fragment implements View.OnClickListener{
 
         //DOWNLOADING WITH GLIDE
         //// TODO: 8/19/2017 SET URL HERE
+        ////TODO: SET DEFAULT IMAGE, IF APPLICABLE
         Glide.with(this)
                .load(R.drawable.tony)
                 .apply(circleCropTransform())
-                .into((ImageView) fragmentView.findViewById(R.id.authorImage));
+                 .into((ImageView) fragmentView.findViewById(R.id.authorImage));
 
-        //SHARE ACTION SET
-         shareIcon.setOnClickListener(new View.OnClickListener() {
-
-               @Override
-               public void onClick(View v) {
-                   //Toast.makeText(getActivity(), "In the zoning!", Toast.LENGTH_SHORT).show();
-                   Intent sendIntent = new Intent();
-                   sendIntent.setAction(Intent.ACTION_SEND);
-                   sendIntent.putExtra(Intent.EXTRA_TEXT, quoteText+authorName);
-                   sendIntent.setType("text/plain");
-                   getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
-               }
-           });
-
+        //SET ONCLICK LISTENER OF ALL ICONS
+        shareIcon.setOnClickListener(this);
         mImageView.setOnClickListener(this);
         mFavView.setOnClickListener(this);
 
@@ -212,6 +209,14 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View v) {
 
+        if(v.getId() == R.id.shareimage){
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, quoteText+authorName);
+            sendIntent.setType("text/plain");
+            getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
+        }
+
         if(v.getId() == R.id.speakimage) {
             String quote = mQuoteTextview.getText().toString();
             //if false
@@ -233,12 +238,16 @@ public class MainFragment extends Fragment implements View.OnClickListener{
              Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
              Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
 
-            //NOT FAVOURITE YET
-            //SO MAKE IT ONE
             if(imageView.getDrawable().getConstantState().equals(favorite.getConstantState())){
+                //NOT FAVOURITE YET, MAKE IT ONE
+
                 imageView.setImageDrawable(faved);
-            }else{ //WAS FAVOURITE, UNDO IT
+                new InsertTask().execute(new FavItem(authorName,quote,1));
+            }else{
+            //WAS FAVOURITE, UNDO IT
+
                 imageView.setImageDrawable(favorite);
+                new DeleteTask().execute(quote);
             }
         }
 
@@ -255,4 +264,65 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         }
     }
 
+    private class CheckAndLoadFavImage extends AsyncTask<String,Void,Boolean>{
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            //IF QUOTE FAVED
+            if(aBoolean == Boolean.TRUE){
+                mFavView.setImageDrawable(null);
+                Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
+            }else{//IF QUOTE NOT FAVED
+                mFavView.setImageDrawable(null);
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            Log.e("ERRRRRRROTTTT", params[0]);
+            Log.e("ERRRRRRROTTTT", params[0]);
+            Log.e("ERRRRRRROTTTT", params[0]);
+            if(dbHelper.quoteExist(params[0]))
+                return Boolean.TRUE;
+            else
+                return Boolean.FALSE;
+        }
+    }
+
+    private class InsertTask extends AsyncTask<FavItem,Void,Boolean>{
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            //IF QUOTE FAVED
+            Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
+            if(aBoolean == Boolean.TRUE){
+                mFavView.setImageDrawable(faved);
+                Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(FavItem... params) {
+
+            return dbHelper.insertContact(params[0].getAuthor(),params[0].getQuote());
+        }
+    }
+
+    private class DeleteTask extends AsyncTask<String,Void,Boolean>{
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            //IF QUOTE FAVED
+            Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
+            if(aBoolean == Boolean.TRUE){
+                mFavView.setImageDrawable(favorite);
+                Toast.makeText(getActivity(),"Deleted From Favourites", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return dbHelper.deleteContact(params[0]);
+        }
+    }
 }

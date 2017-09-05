@@ -59,7 +59,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ViewHolder> {
             public void onClick(View view) {
 
                 Log.e("SENT VALUE", Integer.toString(item.getId()));
-                dbHelper.deleteContact(item.getId());
+                dbHelper.deleteContact(item.getQuote());
 
                 mItems.remove(position);
                 notifyItemRemoved(position);

@@ -54,11 +54,28 @@ public class DBHelper extends SQLiteOpenHelper{
 
     }
 
+    public boolean quoteExist(String quote){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor =  db.rawQuery( "select * from "+ TableName + " where quote = ?", new String[]{quote});
+        if(cursor.getCount() > 0)
+            return false;
+        else
+            return true;
+    }
+
     public boolean deleteContact(int ID){
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "DELETE FROM "+ TableName + " where id = '"+ Integer.toString(ID)+"'";
         Log.e("QUERY", query);
         db.execSQL("DELETE FROM "+ TableName + " where id = '"+ Integer.toString(ID)+"'");
+        db.close();
+        return true;
+    }
+    public boolean deleteContact(String value){
+        SQLiteDatabase db = this.getWritableDatabase();
+        //String query = "DELETE FROM "+ TableName + " where id = '"+ value+"'";
+       // Log.e("QUERY", query);
+        db.execSQL("DELETE FROM "+ TableName + " where quote = '"+ value+"'");
         db.close();
         return true;
     }

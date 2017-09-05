@@ -64,9 +64,13 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout mDrawerLayout;
     private boolean activityAvailable;
+
     private RelativeLayout alternateView;
     private  ProgressBar progressBar;
     private View rootView;
+    private View connectionText;
+    private View connectionImage;
+    private View refreshText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,24 +89,24 @@ public class MainActivity extends AppCompatActivity {
                 // final Handler myHandler = new Handler();
                 setContentView(R.layout.activity_main_alternate);
                 View view = findViewById(R.id.alternate);
+                connectionImage = findViewById(R.id.wifi);
+                connectionText = findViewById(R.id.connectionText);
+                refreshText = findViewById(R.id.refreshText);
+
+
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         Log.e("INSIDE CLICK","ITS REALLY WORKING");
                         Toast.makeText(MainActivity.this,"First run, click, Internet working", Toast.LENGTH_SHORT);
-
                         progressBar = (ProgressBar) (View)findViewById(R.id.progressBar);
                         if(isNetworkConnected()){
                             Toast.makeText(MainActivity.this,"First run, click, Internet working", Toast.LENGTH_SHORT);
-                            progressBar.setVisibility(View.VISIBLE);
-                            SystemClock.sleep(500);
-                            progressBar.setVisibility(View.INVISIBLE);
-                            setUpActivity();
+                            new updateTask2().execute();
                             prefs.edit().putBoolean("firstrun", false).commit();
                         }
                         else {
-                            Toast.makeText(MainActivity.this, "first run, click, Internet not working", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "First run, click, Internet not working", Toast.LENGTH_SHORT).show();
                             new updateTask().execute();
                             prefs.edit().putBoolean("firstrun", true).commit();
                         }
@@ -114,23 +118,6 @@ public class MainActivity extends AppCompatActivity {
             setUpActivity();
             }
         }
-
-
-//        try{
-//            alternateView = (RelativeLayout)findViewById(R.id.alternate);
-//            alternateView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    //someFunction()
-//                }
-//            });
-//        }
-//        catch (Exception e){
-//            //someFuction();
-//        }
-
-
-
 
     }
 
@@ -219,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+
         super.onDestroy();
     }
 
@@ -312,24 +300,80 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // FOR FIRST TIME AND NOT CONNECTED TO INTERNET
     private class updateTask extends AsyncTask<Void, Void, Void>{
 
         @Override
         protected void onPreExecute() {
-
             progressBar.setVisibility(View.VISIBLE);
-           // super.onPreExecute();
+            connectionText.setVisibility(View.INVISIBLE);
+            connectionImage.setVisibility(View.INVISIBLE);
+            refreshText.setVisibility(View.INVISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             progressBar.setVisibility(View.INVISIBLE);
-           // super.onPostExecute(aVoid);
+            connectionText.setVisibility(View.VISIBLE);
+            connectionImage.setVisibility(View.VISIBLE);
+            refreshText.setVisibility(View.VISIBLE);
+//            Toast.makeText(MainActivity)
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            long delayInMillis = 4000;
+            long delayInMillis = 3000;
+            Timer timer = new Timer();
+            try {
+                Thread.sleep(delayInMillis);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    //FOR FIRST TIME AND CONNECTED TO INTERNET,
+    //CHANGE THE CONTENT VIEW OF THE ACTIVITY
+    //BY CALLING SETUPACTIVITY()
+
+    private class updateTask2 extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected void onPreExecute() {
+            try {
+                progressBar.setVisibility(View.VISIBLE);
+                connectionText.setVisibility(View.INVISIBLE);
+                connectionImage.setVisibility(View.INVISIBLE);
+                refreshText.setVisibility(View.INVISIBLE);
+            }catch(Exception e){
+
+                Log.e("ERRRROR", e.getMessage());
+                Log.e("ERRRROR", e.getMessage());
+                Log.e("ERRRROR", e.getMessage());
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+
+            try {
+                progressBar.setVisibility(View.INVISIBLE);
+                connectionText.setVisibility(View.VISIBLE);
+                connectionImage.setVisibility(View.VISIBLE);
+                refreshText.setVisibility(View.VISIBLE);
+            }catch(Exception e){
+                Log.e("ERRRROR", e.getMessage());
+                Log.e("ERRRROR", e.getMessage());
+                Log.e("ERRRROR", e.getMessage());
+            }
+            setUpActivity();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            long delayInMillis = 2000;
             Timer timer = new Timer();
             try {
                 Thread.sleep(delayInMillis);
