@@ -11,6 +11,7 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private View connectionText;
     private View connectionImage;
     private View refreshText;
+    private ProgressBar probar;
+    Snackbar mySnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshText = findViewById(R.id.refreshText);
 
 
-                view.setOnClickListener(new View.OnClickListener() {
+                        view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.e("INSIDE CLICK","ITS REALLY WORKING");
@@ -121,9 +124,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+ //SETTING MAIN ACIVITY CONTENT
     private  void setUpActivity(){
 
         setContentView(R.layout.activity_main);
+        Log.e("IN Fucntion", "MAIN");
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -131,7 +138,10 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
-//        titleText =(TextView) findViewById(R.id.appnametext);
+//      titleText =(TextView) findViewById(R.id.appnametext);
+
+        probar = (ProgressBar) findViewById(R.id.mprobar);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -148,26 +158,67 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                switch (menuItem.getItemId())
+                {
+                    case R.id.nav_favorite: {
+                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+                        Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+                    case R.id.nav_rateus: {
+                        //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
+                        Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+                        startActivity(rateIntent);
+                        return true;
+                    }
+                    case R.id.nav_aboutus: {
+                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+                        Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(MainActivity.this, AboutUs.class));
+                        return true;
+                    }
+                    case R.id.nav_share: {
+
+
+                    }
+                    case R.id.nav_home: {
+
+
+                    }
+                    default:
+                    {}
+
+
+
+                }
+
                 menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
                 startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
-                Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
+               // Toast.makeText(MainActivity.this, menuItem.getTitle(), Toast.LENGTH_LONG).show();
                 return true;
             }
         });
 
+       // navigationView.setNavigationItemSelectedListener(new NavigationItemListener());
+
         //GET AND SET VIEWPAGER
         viewPager = (ViewPager) findViewById(R.id.pager);
-        adapter = new FragmentAdapter(getFragmentManager(), list);
+        adapter = new FragmentAdapter(getFragmentManager(), list, this);
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(7);
         mDatabaseReference.orderByValue().limitToLast(7).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                probar.setVisibility(View.INVISIBLE);
                 quoteData = dataSnapshot.getValue(QuoteData.class);
                 list.add(quoteData);
                 adapter.notifyDataSetChanged();
                 viewPager.setCurrentItem(list.size() - 1, true);
-
+                  Log.e("On Child ADDED","On Child ADDED");
                 // TODO: 8/20/2017  fetch
 
                 if (list.size() >= 2)
@@ -195,8 +246,49 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        new DelayPop().execute();
 
     }
+
+ //ONCLICK OF SHOW NEXT OR SHOW CURRENT ACTIVITY
+//    @Override
+//    public void onClick(View v) {
+//        if(v.getId() == R.id.prevImage)
+//            viewPager.setCurrentItem(getItem(-1), true);
+//        else if(v.getId() == R.id.nextImage){}
+//            viewPager.setCurrentItem(getItem(1), true);
+//    }
+
+
+
+    ////SHOWS SNACKBAR IF NOT CONNECTED TO INTERNET
+   private class DelayPop extends  AsyncTask<Void,Void,Void>
+   {
+       @Override
+       protected Void doInBackground(Void... params) {
+           try {
+               Log.e("BACKGROUND"," thread");
+               Thread.sleep(5000);
+           } catch(InterruptedException ex) {
+               Thread.currentThread().interrupt();
+           }
+           return null;
+       }
+
+       @Override
+       protected void onPostExecute(Void aVoid) {
+           Log.e("POST EXECUTE"," thread");
+
+           Log.e("COUNTER", Integer.toString(adapter.getCount()));
+           if( adapter.getCount() <= 0) {
+               mySnackbar = Snackbar.make(findViewById(R.id.mCordinate),
+                       "Looks Like There is Connection Issue, Check connection and try again", 4000);
+               mySnackbar.show();
+           }
+           super.onPostExecute(aVoid);
+       }
+   }
+
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -276,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
             else if(menuItem.getItemId() == R.id.nav_rateus){
+                //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
                 Intent rateIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
                 startActivity(rateIntent);
                 return true;

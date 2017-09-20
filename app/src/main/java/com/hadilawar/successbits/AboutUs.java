@@ -11,6 +11,8 @@ public class AboutUs extends AppCompatActivity {
 
 
     private TextView aboutTextView;
+    private Toolbar toolbar;
+    private TextView aboutUsTitleText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,17 +20,16 @@ public class AboutUs extends AppCompatActivity {
         setContentView(R.layout.activity_about_us);
 
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.aboutUsTool);
+        toolbar = (Toolbar) findViewById(R.id.aboutUsTool);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         aboutTextView= (TextView) findViewById(R.id.aboutUsTextView);
-
-        Typeface typo = Typeface.createFromAsset(getAssets(), "fonts/lemonada-regular.ttf");
-        aboutTextView.setTypeface(typo);
-
+        aboutUsTitleText = (TextView) findViewById(R.id.aboutUsTitleText);
+        aboutUsTitleText.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lemonada-regular.ttf"));
+        aboutTextView.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/lemonada-regular.ttf"));
 
     }
 }

@@ -18,7 +18,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/aboutauthortitle"
+        android:id="@+id/bottomsheettitle"
         android:text="About Tony Robbins"
         android:layout_margin="5dp"
         android:textSize="15sp"
@@ -28,7 +28,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/aboutauthortext"
+        android:id="@+id/bottomsheettext"
         android:textSize="12sp"
         android:textAlignment="center"
         android:textColor="#fff"

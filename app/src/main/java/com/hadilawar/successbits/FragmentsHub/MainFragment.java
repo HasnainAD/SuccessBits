@@ -1,7 +1,10 @@
 package com.hadilawar.successbits.FragmentsHub;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -10,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.res.ResourcesCompat;
@@ -25,11 +29,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import static com.bumptech.glide.request.RequestOptions.circleCropTransform;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.hadilawar.successbits.DBHelper;
 import com.hadilawar.successbits.FavoritesHub.FavItem;
 import com.hadilawar.successbits.R;
 import com.hadilawar.successbits.Others.Speaker;
 
+import java.security.MessageDigest;
 import java.util.HashMap;
 
 public class MainFragment extends Fragment implements View.OnClickListener{
@@ -51,10 +62,16 @@ public class MainFragment extends Fragment implements View.OnClickListener{
     private String imageUrl;
     private String quoteText;
     private String authorName;
+    private String aboutAuthor;
     private NotificationCompat.Builder mBuilder;
     private ImageView shareIcon;
+    private ImageView nextImage;
+    private ImageView prevImage;
+
     DBHelper dbHelper;
     private String quote;
+    private  boolean quoteIsFaved = false;
+    ViewPager mViewpager;
 
     //Returns an Instance of fragment
     static Fragment newInstance(int position, QuoteData quoteData) {
@@ -64,44 +81,51 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         args.putString("quote", quoteData.getQuote());
         args.putString("author", quoteData.getAuthorName());
         args.putString("imgurl", quoteData.getImageUrl());
+        args.putString("aboutauthor", quoteData.getAboutAuthor());
         args.putInt("position", position);
         result.setArguments(args);
-        return(result);
+        return result;
     }
 
     public MainFragment(){}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        dbHelper = new DBHelper(getActivity());
+        speaker = new Speaker(getActivity());
+        tts = new TextToSpeech(getActivity(), speaker);
+        quote = (String)getArguments().get("quote");
+        quoteText = "\""+getArguments().get("quote") +".\"";
+        authorName = getArguments().getString("author");
+        imageUrl = getArguments().getString("imgurl");
+        aboutAuthor = getArguments().getString("aboutauthor");
+
+        position = getArguments().getInt("position");
+
+        speaking = false;
+        mViewpager= (ViewPager) getActivity().findViewById(R.id.pager);
+
+
+//
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        speaker = new Speaker(getActivity());
-        dbHelper = new DBHelper(getActivity());
-        tts = new TextToSpeech(getActivity(), speaker);
         View fragmentView = inflater.inflate(R.layout.fragment,container, false);
-        ViewPager mViewpager= (ViewPager) getActivity().findViewById(R.id.pager);
-
-        quote = (String)getArguments().get("quote");
-        quoteText = "\""+(String)getArguments().get("quote") +".\"";
-        authorName = getArguments().getString("author");
-        imageUrl = getArguments().getString("imgurl");
-        position = getArguments().getInt("position");
-        speaking = false;
-
-        //FIND WIDGETS
         mQuoteTextview = (TextView)fragmentView.findViewById(R.id.quotetext);
-        mAboutTitleText =(TextView)fragmentView.findViewById(R.id.aboutauthortitle);
-        mAboutText =     (TextView)fragmentView.findViewById(R.id.aboutauthortext);
+        mAboutTitleText =(TextView)fragmentView.findViewById(R.id.bottomsheettitle);
+        mAboutText =     (TextView)fragmentView.findViewById(R.id.bottomsheettext);
         mAuthorNameText =(TextView)fragmentView.findViewById(R.id.authorName);
         mFavView =       (ImageView)fragmentView.findViewById(R.id.favimage);
         mImageView =     (ImageView)fragmentView.findViewById(R.id.speakimage);
         shareIcon =      (ImageView) fragmentView.findViewById(R.id.shareimage);
 
-
-        //SET TYPEFACE OF TEXTVIEWS
         mAuthorNameText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-regular.ttf"));
-        mQuoteTextview.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf"));
+        mQuoteTextview.setTypeface(Typeface.createFromAsset(getActivity().getAssets() , "fonts/Lemonada-Light.ttf"));
         mAboutTitleText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/lemonada-semibold.ttf"));
         mAboutText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "fonts/Lemonada-Light.ttf"));
 
@@ -109,9 +133,19 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         mQuoteTextview.setText(quoteText);
         mAuthorNameText.setText(authorName);
 
+        mAboutText.setText(aboutAuthor);
+        mAuthorNameText.setText(authorName);
+
+
         //ALL BOTTOMSHEETS MATERIAL
         bottomSheetImageView = (ImageView)fragmentView.findViewById(R.id.bottom_sheet_indicator);
         final View bottomSheet = (View) fragmentView.findViewById(R.id.bottom_sheet);
+
+//        TextView bottomSheetTitle = (TextView) bottomSheet.findViewById(R.id.bottomsheettitle);
+//        TextView bottomSheetText  = (TextView) bottomSheet.findViewById(R.id.bottomsheettext);
+//
+
+
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(80);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -139,10 +173,8 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                 }
             }
         });
-
         //SET FAVORITE ICON
-        new  CheckAndLoadFavImage().execute(quote);
-
+       new  CheckAndLoadFavImage().execute(quote);
         //FRAGMENT CHANGE LISTENER
         mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -170,9 +202,30 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         //// TODO: 8/19/2017 SET URL HERE
         ////TODO: SET DEFAULT IMAGE, IF APPLICABLE
         Glide.with(this)
-               .load(R.drawable.tony)
+               .load(imageUrl)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        return false;
+                    }
+                })
                 .apply(circleCropTransform())
                  .into((ImageView) fragmentView.findViewById(R.id.authorImage));
+
+        // SET AT START IF ITS FAVED
+//        if(quoteIsFaved){
+//            mFavView.setImageResource(R.drawable.faved);
+//            Toast.makeText(getActivity(),"returns true", Toast.LENGTH_SHORT).show();
+//        }
+//        else{
+//            mFavView.setImageResource(R.drawable.favorite);
+//            Toast.makeText(getActivity(),"returns false", Toast.LENGTH_SHORT).show();
+//        }
 
         //SET ONCLICK LISTENER OF ALL ICONS
         shareIcon.setOnClickListener(this);
@@ -193,7 +246,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
                         mImageView.setImageResource(R.drawable.speak);
                         //if(am!=null)
                           //  am.stop();
-                        Toast.makeText(getActivity(),"hapakalo",Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getActivity(),"hapakalo",Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -205,11 +258,23 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         return(fragmentView);
 
     }
+    private int getItem(int i) {
+        return mViewpager.getCurrentItem() + i;
+    }
 
+    //THIS HANDLES ALL THE ONCLICKS IN A FRAGMENT
     @Override
     public void onClick(View v) {
 
-        if(v.getId() == R.id.shareimage){
+        if(v.getId() == R.id.prevImage) {
+            mViewpager.setCurrentItem(getItem(-1), true);
+        }
+        else if(v.getId() == R.id.nextImage){
+
+            mViewpager.setCurrentItem(getItem(1), true);
+        }
+
+        else if (v.getId() == R.id.shareimage){
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.putExtra(Intent.EXTRA_TEXT, quoteText+authorName);
@@ -217,7 +282,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             getActivity().startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
         }
 
-        if(v.getId() == R.id.speakimage) {
+       else if(v.getId() == R.id.speakimage) {
             String quote = mQuoteTextview.getText().toString();
             //if false
             if (!speaking) {
@@ -237,20 +302,16 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             ImageView imageView = (ImageView)v;
              Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
              Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
-
             if(imageView.getDrawable().getConstantState().equals(favorite.getConstantState())){
                 //NOT FAVOURITE YET, MAKE IT ONE
-
                 imageView.setImageDrawable(faved);
                 new InsertTask().execute(new FavItem(authorName,quote,1));
             }else{
-            //WAS FAVOURITE, UNDO IT
-
+               //WAS FAVOURITE, UNDO IT
                 imageView.setImageDrawable(favorite);
                 new DeleteTask().execute(quote);
             }
         }
-
     }
 
     private void speak(String text){
@@ -264,31 +325,38 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         }
     }
 
+    //BACKGROUND THREAD FOR CHECKING WHETHER CURRENT QUOTE IS FAVORITE OR NOT
     private class CheckAndLoadFavImage extends AsyncTask<String,Void,Boolean>{
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             //IF QUOTE FAVED
             if(aBoolean == Boolean.TRUE){
-                mFavView.setImageDrawable(null);
-                Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
+                mFavView.setImageResource(R.drawable.faved);
+               // Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
             }else{//IF QUOTE NOT FAVED
-                mFavView.setImageDrawable(null);
+                mFavView.setImageResource(R.drawable.favorite);
             }
         }
 
         @Override
         protected Boolean doInBackground(String... params) {
-            Log.e("ERRRRRRROTTTT", params[0]);
-            Log.e("ERRRRRRROTTTT", params[0]);
-            Log.e("ERRRRRRROTTTT", params[0]);
-            if(dbHelper.quoteExist(params[0]))
+
+            if(dbHelper.quoteExist(params[0])) {
+
+                Log.e("THIS EXISTS", params[0]);
+
                 return Boolean.TRUE;
-            else
+            }
+            else{
+                Log.e("THIS DOES NOT EXIST", params[0]);
+
                 return Boolean.FALSE;
+            }
         }
     }
 
+    //BACKGROUND THREAD FOR MAKING THE QUOTE FAVORITE
     private class InsertTask extends AsyncTask<FavItem,Void,Boolean>{
 
         @Override
@@ -297,7 +365,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             Drawable faved = ResourcesCompat.getDrawable(getResources(), R.drawable.faved, null);
             if(aBoolean == Boolean.TRUE){
                 mFavView.setImageDrawable(faved);
-                Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(getActivity(),"Added to Favourites", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -308,6 +376,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
         }
     }
 
+    //BACKGROUND THREAD FOR MAKING THE QUOTE FAVOURITE
     private class DeleteTask extends AsyncTask<String,Void,Boolean>{
 
         @Override
@@ -316,7 +385,7 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             Drawable favorite= ResourcesCompat.getDrawable(getResources(), R.drawable.favorite, null);
             if(aBoolean == Boolean.TRUE){
                 mFavView.setImageDrawable(favorite);
-                Toast.makeText(getActivity(),"Deleted From Favourites", Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(getActivity(),"Deleted From Favourites", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -325,4 +394,5 @@ public class MainFragment extends Fragment implements View.OnClickListener{
             return dbHelper.deleteContact(params[0]);
         }
     }
+
 }

@@ -32,20 +32,7 @@ public class DBHelper extends SQLiteOpenHelper{
                         "(id integer primary key AUTOINCREMENT, author text, quote text)"
         );
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(AuthorColumn, "Tony Robbins");
-        contentValues.put(QuoteColumn, "What makes you comfortable can ruin you, what makes you uncomfortable is the only way to grow");
-        db.insert(TableName, null, contentValues);
 
-        ContentValues contentValues2 = new ContentValues();
-        contentValues2.put(AuthorColumn, "Maxwell johns");
-        contentValues2.put(QuoteColumn, "I need to move then I will began to feel the movement");
-        db.insert(TableName, null, contentValues2);
-
-        ContentValues contentValues3 = new ContentValues();
-        contentValues3.put(AuthorColumn, "Maxwell johns");
-        contentValues3.put(QuoteColumn, "I need to move and then I will began to feel the movement");
-        db.insert(TableName, null, contentValues3);
 
     }
 
@@ -58,9 +45,9 @@ public class DBHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor =  db.rawQuery( "select * from "+ TableName + " where quote = ?", new String[]{quote});
         if(cursor.getCount() > 0)
-            return false;
-        else
             return true;
+        else
+            return false;
     }
 
     public boolean deleteContact(int ID){
@@ -75,7 +62,9 @@ public class DBHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         //String query = "DELETE FROM "+ TableName + " where id = '"+ value+"'";
        // Log.e("QUERY", query);
-        db.execSQL("DELETE FROM "+ TableName + " where quote = '"+ value+"'");
+        String query = "DELETE FROM "+ TableName + " where quote = \""+ value+"\"";
+        Log.e("QUERY", query);
+        db.execSQL(query);
         db.close();
         return true;
     }

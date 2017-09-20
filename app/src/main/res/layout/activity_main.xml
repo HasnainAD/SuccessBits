@@ -12,7 +12,10 @@ android:fitsSystemWindows="true">
 
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/mCordinate"
+        android:background="@drawable/background8"
+        >
 
 
 
@@ -41,6 +44,20 @@ android:fitsSystemWindows="true">
                 android:textSize="25sp"/>
 
             </android.support.v7.widget.Toolbar>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/mprobar"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                />
+
+        </RelativeLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 
